@@ -1,0 +1,831 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambo | Indian Restaurant Demo</title>
+  <style>
+    :root {
+      --green: #176b45;
+      --green-dark: #104b31;
+      --cream: #fffaf1;
+      --orange: #e88935;
+      --text: #242a25;
+      --muted: #68716b;
+      --border: #e5e8e3;
+      --white: #ffffff;
+      --red: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f5f7f3;
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    header {
+      background: var(--green-dark);
+      color: white;
+      padding: 18px 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+    .brand small { display: block; font-size: 11px; letter-spacing: 3px; font-weight: 400; margin-top: 4px; }
+    .header-note { font-size: 13px; opacity: .9; }
+
+    main { max-width: 1250px; margin: auto; padding: 24px 18px 60px; }
+
+    .hero {
+      background: linear-gradient(120deg, #fff5e6, #f4e3c8);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 { font-size: clamp(26px, 4vw, 40px); margin: 0 0 10px; }
+    .hero p { color: #57564f; margin: 0; line-height: 1.6; max-width: 650px; }
+
+    .toolbar, .tabs, .filters, .row, .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar { justify-content: space-between; margin: 20px 0; }
+    .tabs { margin: 18px 0 24px; }
+
+    .tab, .filter {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-weight: 650;
+    }
+
+    .tab.active, .filter.active { background: var(--green); color: white; border-color: var(--green); }
+
+    .button {
+      background: var(--green);
+      color: white;
+      border: 0;
+      padding: 11px 15px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .button:hover { background: var(--green-dark); }
+    .button.secondary { background: #e8efe9; color: var(--green-dark); }
+    .button.orange { background: var(--orange); color: #24180d; }
+    .button.danger { background: #fde8e7; color: var(--red); }
+    .button.small { padding: 7px 10px; font-size: 12px; }
+    .button:disabled { opacity: .45; cursor: not-allowed; }
+
+    .field { display: grid; gap: 6px; margin-bottom: 14px; }
+    .field label { font-size: 13px; font-weight: 700; }
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d8ded8;
+      border-radius: 9px;
+      background: white;
+      color: var(--text);
+    }
+
+    .table-select { width: auto; min-width: 150px; }
+    .search { width: min(100%, 300px); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+      gap: 17px;
+    }
+
+    .dish {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .dish-art {
+      min-height: 135px;
+      background: linear-gradient(135deg, #fff1d9, #f8dfbd);
+      display: grid;
+      place-items: center;
+      font-size: 62px;
+    }
+
+    .dish-content { padding: 16px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+    .dish h3 { margin: 0; font-size: 17px; }
+    .dish p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; flex: 1; }
+    .price { color: var(--green); font-weight: 800; font-size: 19px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .badge { display: inline-block; padding: 5px 8px; border-radius: 99px; font-size: 11px; font-weight: 750; background: #e8f4eb; color: var(--green); }
+    .badge.off { background: #fce8e6; color: var(--red); }
+    .dish .button { width: 100%; margin-top: 4px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(290px, .8fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+      min-width: 0;
+    }
+
+    .panel h2 { margin: 0 0 16px; font-size: 20px; }
+    .cart-line { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+    .cart-line strong { display: block; font-size: 14px; }
+    .cart-line small { color: var(--muted); }
+    .qty { display: flex; align-items: center; gap: 7px; }
+    .qty button { border: 1px solid var(--border); background: white; border-radius: 7px; width: 28px; height: 28px; }
+    .total-line { display: flex; justify-content: space-between; margin: 12px 0; }
+    .total-line.grand { font-size: 20px; font-weight: 800; border-top: 1px solid var(--border); padding-top: 14px; }
+
+    .empty { padding: 30px 12px; text-align: center; color: var(--muted); line-height: 1.6; }
+    .hidden { display: none !important; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat { background: white; padding: 17px; border: 1px solid var(--border); border-radius: 14px; }
+    .stat span { color: var(--muted); font-size: 13px; }
+    .stat strong { display: block; font-size: 26px; margin-top: 8px; }
+
+    .order {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 13px;
+    }
+
+    .order-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .order h3 { margin: 0 0 6px; }
+    .order-items { color: #505b53; font-size: 14px; line-height: 1.8; }
+    .order-bottom { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    .status { padding: 6px 9px; border-radius: 8px; background: #fff2d8; color: #8b5a00; font-size: 12px; font-weight: 750; }
+    .status.Ready, .status.Served { background: #e5f5e9; color: #176b45; }
+    .status.Cancelled { background: #fde8e7; color: #b42318; }
+    .status.Preparing { background: #e7efff; color: #244d9b; }
+
+    .qr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+    .table-card { background: white; padding: 18px; border: 1px solid var(--border); border-radius: 14px; }
+    .table-card h3 { margin-top: 0; }
+    .link-box { overflow-wrap: anywhere; padding: 10px; background: #f3f5f1; border-radius: 8px; font-size: 12px; margin: 10px 0; }
+    .notice { background: #fff4df; border: 1px solid #f1d7a6; border-radius: 10px; padding: 12px; font-size: 13px; line-height: 1.5; color: #6d4b12; margin-bottom: 18px; }
+
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 22px 10px; }
+
+    @media (max-width: 780px) {
+      .layout { grid-template-columns: 1fr; }
+      .hero { padding: 23px; }
+      .panel { padding: 15px; }
+      header { padding: 17px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">TAMBO <small>INDIAN KITCHEN · RESTAURANT DEMO</small></div>
+    <div class="header-note">Fresh flavours · Made with care</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Good food. Great moments.</h1>
+      <p>Explore our menu of Indian favourites, place your order, and let our team take care of the rest.</p>
+    </section>
+
+    <div class="notice">
+      <strong>Demo notice:</strong> This prototype stores data in this browser only. Orders are not sent to a real kitchen or payment provider. Table links are generated locally; deploy the website publicly before using QR codes with customers.
+    </div>
+
+    <div class="toolbar">
+      <div class="row">
+        <label for="tableSelect"><strong>Your table</strong></label>
+        <select id="tableSelect" class="table-select" aria-label="Select table"></select>
+      </div>
+      <div class="muted">All prices in Indian rupees (INR)</div>
+    </div>
+
+    <nav class="tabs" aria-label="Restaurant sections">
+      <button class="tab active" data-view="customer">Customer Menu</button>
+      <button class="tab" data-view="manage">Manage Menu</button>
+      <button class="tab" data-view="staff">Staff Orders</button>
+      <button class="tab" data-view="tables">Table Links</button>
+    </nav>
+
+    <section id="customerView">
+      <div class="toolbar">
+        <div>
+          <h2 style="margin:0 0 5px">Our Menu</h2>
+          <div class="muted">Choose your favourites and add them to your order.</div>
+        </div>
+        <input id="searchMenu" class="search" placeholder="Search dishes..." aria-label="Search dishes">
+      </div>
+
+      <div id="categoryFilters" class="filters" style="margin-bottom:18px"></div>
+
+      <div class="layout">
+        <div id="menuGrid" class="grid"></div>
+        <aside class="panel">
+          <h2>Your Order <span id="cartCount" class="badge">0 items</span></h2>
+          <div id="cartItems"></div>
+          <div id="cartTotals"></div>
+          <div class="field" style="margin-top:18px">
+            <label for="customerName">Your name</label>
+            <input id="customerName" placeholder="Enter your name" maxlength="70">
+          </div>
+          <div class="field">
+            <label for="customerNote">Special instructions (optional)</label>
+            <textarea id="customerNote" rows="2" maxlength="250" placeholder="Less spicy, no onions..."></textarea>
+          </div>
+          <button id="placeOrder" class="button" style="width:100%">Place Order</button>
+          <p class="muted">Payment is not collected in this demo.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="manageView" class="hidden">
+      <div class="toolbar">
+        <div>
+          <h2 style="margin:0 0 5px">Menu Management</h2>
+          <div class="muted">Add dishes, change prices, and manage availability.</div>
+        </div>
+        <button id="newDishButton" class="button">+ Add Dish</button>
+      </div>
+
+      <div id="dishFormPanel" class="panel hidden">
+        <h2 id="dishFormTitle">Add a dish</h2>
+        <form id="dishForm">
+          <input type="hidden" id="dishId">
+          <div class="grid">
+            <div class="field"><label for="dishName">Dish name</label><input id="dishName" required maxlength="80"></div>
+            <div class="field"><label for="dishCategory">Category</label>
+              <select id="dishCategory" required>
+                <option>Starters</option><option>Main Course</option><option>Breads</option><option>Rice & Biryani</option><option>Drinks</option><option>Desserts</option>
+              </select>
+            </div>
+            <div class="field"><label for="dishPrice">Price (₹ INR)</label><input id="dishPrice" type="number" min="1" max="100000" step="1" required></div>
+            <div class="field"><label for="dishEmoji">Menu icon (emoji)</label><input id="dishEmoji" maxlength="8" placeholder="🍛"></div>
+          </div>
+          <div class="field"><label for="dishDescription">Description</label><textarea id="dishDescription" rows="2" maxlength="250" required></textarea></div>
+          <div class="row">
+            <label><input id="dishAvailable" type="checkbox" checked style="width:auto"> Available to order</label>
+            <button class="button" type="submit">Save Dish</button>
+            <button class="button secondary" id="cancelDishForm" type="button">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="manageGrid" class="grid"></div>
+    </section>
+
+    <section id="staffView" class="hidden">
+      <div class="toolbar">
+        <div>
+          <h2 style="margin:0 0 5px">Staff Order Dashboard</h2>
+          <div class="muted">Review customer orders and update their progress.</div>
+        </div>
+        <button id="exportOrders" class="button secondary">Export Orders CSV</button>
+      </div>
+      <div id="staffStats" class="stat-grid"></div>
+      <div class="filters" id="orderFilters" style="margin-bottom:18px"></div>
+      <div id="ordersList"></div>
+    </section>
+
+    <section id="tablesView" class="hidden">
+      <h2>Table Links</h2>
+      <p class="muted">Each link selects a table in the customer menu. Generate real QR images for these links after the site is deployed to a public URL.</p>
+      <div id="tableLinks" class="qr-grid"></div>
+    </section>
+  </main>
+
+  <footer>TAMBO Indian Kitchen · Demonstration restaurant ordering system · Prices shown in ₹ INR</footer>
+
+  <script>
+    "use strict";
+
+    const CURRENCY = "INR";
+    const money = amount => new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: CURRENCY,
+      maximumFractionDigits: 0
+    }).format(Number(amount) || 0);
+
+    const defaultDishes = [
+      { id: "d1", name: "Vegetable Samosa", category: "Starters", price: 80, emoji: "🥟", description: "Crispy pastry filled with spiced potatoes and peas.", available: true },
+      { id: "d2", name: "Paneer Tikka", category: "Starters", price: 220, emoji: "🧀", description: "Marinated paneer grilled with peppers and Indian spices.", available: true },
+      { id: "d3", name: "Masala Papad", category: "Starters", price: 70, emoji: "🫓", description: "Crispy papad topped with onion, tomato and herbs.", available: true },
+      { id: "d4", name: "Paneer Butter Masala", category: "Main Course", price: 280, emoji: "🍛", description: "Paneer in a creamy tomato and butter gravy.", available: true },
+      { id: "d5", name: "Chicken Curry", category: "Main Course", price: 300, emoji: "🍗", description: "Indian-style chicken curry with aromatic spices.", available: true },
+      { id: "d6", name: "Chana Masala", category: "Main Course", price: 190, emoji: "🫘", description: "Chickpeas simmered in a tangy onion-tomato masala.", available: true },
+      { id: "d7", name: "Masala Dosa", category: "Main Course", price: 160, emoji: "🥞", description: "Crisp dosa filled with spiced potato, served with chutney.", available: true },
+      { id: "d8", name: "Butter Naan", category: "Breads", price: 60, emoji: "🫓", description: "Soft tandoor-baked flatbread brushed with butter.", available: true },
+      { id: "d9", name: "Garlic Naan", category: "Breads", price: 80, emoji: "🫓", description: "Naan topped with garlic and fresh coriander.", available: true },
+      { id: "d10", name: "Jeera Rice", category: "Rice & Biryani", price: 150, emoji: "🍚", description: "Fragrant basmati rice tempered with cumin.", available: true },
+      { id: "d11", name: "Chicken Biryani", category: "Rice & Biryani", price: 320, emoji: "🍲", description: "Aromatic basmati rice layered with spiced chicken.", available: true },
+      { id: "d12", name: "Vegetable Biryani", category: "Rice & Biryani", price: 250, emoji: "🍛", description: "Basmati rice cooked with vegetables and spices.", available: true },
+      { id: "d13", name: "Mango Lassi", category: "Drinks", price: 100, emoji: "🥭", description: "Chilled yoghurt drink blended with mango.", available: true },
+      { id: "d14", name: "Masala Chai", category: "Drinks", price: 50, emoji: "☕", description: "Indian tea brewed with milk and warming spices.", available: true },
+      { id: "d15", name: "Fresh Lime Soda", category: "Drinks", price: 80, emoji: "🍋", description: "Refreshing lime drink, sweet or salted.", available: true },
+      { id: "d16", name: "Gulab Jamun", category: "Desserts", price: 90, emoji: "🍮", description: "Soft milk-solid dumplings in fragrant sugar syrup.", available: true },
+      { id: "d17", name: "Kulfi", category: "Desserts", price: 110, emoji: "🍨", description: "Traditional Indian frozen dessert with cardamom.", available: true }
+    ];
+
+    const STORAGE = {
+      dishes: "tambo_india_dishes_v1",
+      orders: "tambo_india_orders_v1"
+    };
+
+    function loadData(key, fallback) {
+      try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch (error) {
+        console.warn("Could not read saved data:", error);
+        return fallback;
+      }
+    }
+
+    let dishes = loadData(STORAGE.dishes, defaultDishes);
+    let orders = loadData(STORAGE.orders, []);
+    let cart = {};
+    let activeCategory = "All";
+    let activeOrderFilter = "All";
+    let currentView = "customer";
+
+    function saveDishes() {
+      localStorage.setItem(STORAGE.dishes, JSON.stringify(dishes));
+    }
+
+    function saveOrders() {
+      localStorage.setItem(STORAGE.orders, JSON.stringify(orders));
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function getTable() {
+      const params = new URLSearchParams(location.search);
+      const fromURL = Number(params.get("table"));
+      const selectValue = Number(document.getElementById("tableSelect").value);
+      return Math.min(20, Math.max(1, fromURL || selectValue || 1));
+    }
+
+    function initTables() {
+      const select = document.getElementById("tableSelect");
+      select.innerHTML = Array.from({ length: 20 }, (_, i) =>
+        `<option value="${i + 1}">Table ${i + 1}</option>`
+      ).join("");
+
+      const requested = Number(new URLSearchParams(location.search).get("table")) || 1;
+      select.value = String(Math.min(20, Math.max(1, requested)));
+
+      select.addEventListener("change", () => {
+        const url = new URL(location.href);
+        url.searchParams.set("table", select.value);
+        history.replaceState({}, "", url);
+        renderAll();
+      });
+    }
+
+    function setView(view) {
+      currentView = view;
+      document.querySelectorAll(".tab").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === view);
+      });
+      ["customer", "manage", "staff", "tables"].forEach(name => {
+        document.getElementById(name + "View").classList.toggle("hidden", name !== view);
+      });
+      renderAll();
+    }
+
+    document.querySelectorAll(".tab").forEach(button => {
+      button.addEventListener("click", () => setView(button.dataset.view));
+    });
+
+    function renderCategories() {
+      const categories = ["All", ...new Set(dishes.map(d => d.category))];
+      document.getElementById("categoryFilters").innerHTML = categories.map(category =>
+        `<button class="filter ${activeCategory === category ? "active" : ""}" data-category="${escapeHTML(category)}">${escapeHTML(category)}</button>`
+      ).join("");
+
+      document.querySelectorAll("[data-category]").forEach(button => {
+        button.addEventListener("click", () => {
+          activeCategory = button.dataset.category;
+          renderCategories();
+          renderMenu();
+        });
+      });
+    }
+
+    function dishCard(dish, management = false) {
+      const availability = dish.available
+        ? '<span class="badge">Available</span>'
+        : '<span class="badge off">Unavailable</span>';
+
+      return `
+        <article class="dish">
+          <div class="dish-art" aria-hidden="true">${escapeHTML(dish.emoji || "🍽️")}</div>
+          <div class="dish-content">
+            <div class="row" style="justify-content:space-between">
+              <span class="badge">${escapeHTML(dish.category)}</span>
+              ${management ? availability : ""}
+            </div>
+            <h3>${escapeHTML(dish.name)}</h3>
+            <p>${escapeHTML(dish.description)}</p>
+            <div class="price">${money(dish.price)}</div>
+            ${management
+              ? `<button class="button secondary" data-edit="${escapeHTML(dish.id)}">Edit Dish</button>
+                 <button class="button ${dish.available ? "danger" : ""}" data-toggle="${escapeHTML(dish.id)}">${dish.available ? "Mark Unavailable" : "Mark Available"}</button>
+                 <button class="button danger" data-delete="${escapeHTML(dish.id)}">Delete Dish</button>`
+              : `<button class="button" data-add="${escapeHTML(dish.id)}" ${!dish.available ? "disabled" : ""}>${dish.available ? "Add to Order" : "Currently Unavailable"}</button>`
+            }
+          </div>
+        </article>`;
+    }
+
+    function renderMenu() {
+      const search = document.getElementById("searchMenu").value.trim().toLowerCase();
+      const visible = dishes.filter(dish =>
+        dish.available &&
+        (activeCategory === "All" || dish.category === activeCategory) &&
+        (dish.name.toLowerCase().includes(search) || dish.description.toLowerCase().includes(search))
+      );
+
+      document.getElementById("menuGrid").innerHTML = visible.length
+        ? visible.map(dish => dishCard(dish)).join("")
+        : '<div class="empty">No available dishes match your search.</div>';
+
+      document.querySelectorAll("[data-add]").forEach(button => {
+        button.addEventListener("click", () => addToCart(button.dataset.add));
+      });
+    }
+
+    function renderCart() {
+      const entries = Object.entries(cart).filter(([, qty]) => qty > 0);
+      const count = entries.reduce((sum, [, qty]) => sum + qty, 0);
+      const subtotal = entries.reduce((sum, [id, qty]) => {
+        const dish = dishes.find(item => item.id === id && item.available);
+        return sum + (dish ? dish.price * qty : 0);
+      }, 0);
+
+      document.getElementById("cartCount").textContent = `${count} item${count === 1 ? "" : "s"}`;
+
+      document.getElementById("cartItems").innerHTML = entries.length
+        ? entries.map(([id, qty]) => {
+            const dish = dishes.find(item => item.id === id && item.available);
+            if (!dish) return "";
+            return `<div class="cart-line">
+              <div><strong>${escapeHTML(dish.name)}</strong><small>${money(dish.price)} each</small></div>
+              <div style="text-align:right">
+                <strong>${money(dish.price * qty)}</strong>
+                <div class="qty" style="margin-top:7px;justify-content:flex-end">
+                  <button data-minus="${escapeHTML(id)}" aria-label="Decrease quantity">−</button>
+                  <span>${qty}</span>
+                  <button data-plus="${escapeHTML(id)}" aria-label="Increase quantity">+</button>
+                </div>
+              </div>
+            </div>`;
+          }).join("")
+        : '<div class="empty">Your cart is empty.<br>Add something delicious!</div>';
+
+      document.getElementById("cartTotals").innerHTML = `
+        <div class="total-line"><span>Subtotal</span><strong>${money(subtotal)}</strong></div>
+        <div class="total-line"><span>Tax / service charge</span><span class="muted">Not included</span></div>
+        <div class="total-line grand"><span>Total</span><span>${money(subtotal)}</span></div>`;
+
+      document.getElementById("placeOrder").disabled = count === 0;
+
+      document.querySelectorAll("[data-minus]").forEach(button => {
+        button.addEventListener("click", () => changeQuantity(button.dataset.minus, -1));
+      });
+      document.querySelectorAll("[data-plus]").forEach(button => {
+        button.addEventListener("click", () => changeQuantity(button.dataset.plus, 1));
+      });
+    }
+
+    function addToCart(id) {
+      const dish = dishes.find(item => item.id === id);
+      if (!dish || !dish.available) return;
+      cart[id] = (cart[id] || 0) + 1;
+      renderCart();
+    }
+
+    function changeQuantity(id, delta) {
+      cart[id] = Math.max(0, (cart[id] || 0) + delta);
+      if (cart[id] === 0) delete cart[id];
+      renderCart();
+    }
+
+    function placeOrder() {
+      const name = document.getElementById("customerName").value.trim();
+      if (!name) {
+        alert("Please enter your name before placing the order.");
+        document.getElementById("customerName").focus();
+        return;
+      }
+
+      const items = Object.entries(cart).map(([id, qty]) => {
+        const dish = dishes.find(item => item.id === id && item.available);
+        return dish ? {
+          dishId: dish.id,
+          name: dish.name,
+          price: dish.price,
+          quantity: qty,
+          lineTotal: dish.price * qty
+        } : null;
+      }).filter(Boolean);
+
+      if (!items.length) {
+        alert("Please add an available dish to your order.");
+        return;
+      }
+
+      const total = items.reduce((sum, item) => sum + item.lineTotal, 0);
+      const order = {
+        id: "TB" + Date.now().toString().slice(-8),
+        customer: name,
+        table: getTable(),
+        items,
+        total,
+        note: document.getElementById("customerNote").value.trim(),
+        status: "Pending",
+        createdAt: new Date().toISOString()
+      };
+
+      orders.unshift(order);
+      saveOrders();
+      cart = {};
+      document.getElementById("customerName").value = "";
+      document.getElementById("customerNote").value = "";
+      renderCart();
+      alert(`Order ${order.id} placed successfully!\nTable ${order.table}\nTotal: ${money(order.total)}`);
+      setView("staff");
+    }
+
+    function openDishForm(dish = null) {
+      document.getElementById("dishForm").reset();
+      document.getElementById("dishId").value = dish ? dish.id : "";
+      document.getElementById("dishFormTitle").textContent = dish ? "Edit dish" : "Add a dish";
+      document.getElementById("dishName").value = dish ? dish.name : "";
+      document.getElementById("dishCategory").value = dish ? dish.category : "Starters";
+      document.getElementById("dishPrice").value = dish ? dish.price : "";
+      document.getElementById("dishEmoji").value = dish ? dish.emoji : "";
+      document.getElementById("dishDescription").value = dish ? dish.description : "";
+      document.getElementById("dishAvailable").checked = dish ? dish.available : true;
+      document.getElementById("dishFormPanel").classList.remove("hidden");
+      document.getElementById("dishName").focus();
+    }
+
+    function renderManage() {
+      document.getElementById("manageGrid").innerHTML = dishes.length
+        ? dishes.map(dish => dishCard(dish, true)).join("")
+        : '<div class="empty">No dishes yet. Add your first dish.</div>';
+
+      document.querySelectorAll("[data-edit]").forEach(button => {
+        button.addEventListener("click", () => {
+          const dish = dishes.find(item => item.id === button.dataset.edit);
+          if (dish) openDishForm(dish);
+        });
+      });
+
+      document.querySelectorAll("[data-toggle]").forEach(button => {
+        button.addEventListener("click", () => {
+          const dish = dishes.find(item => item.id === button.dataset.toggle);
+          if (!dish) return;
+          dish.available = !dish.available;
+          saveDishes();
+          renderAll();
+        });
+      });
+
+      document.querySelectorAll("[data-delete]").forEach(button => {
+        button.addEventListener("click", () => {
+          const dish = dishes.find(item => item.id === button.dataset.delete);
+          if (!dish) return;
+          if (!confirm(`Delete "${dish.name}" from the menu? Existing orders will be preserved.`)) return;
+          dishes = dishes.filter(item => item.id !== dish.id);
+          delete cart[dish.id];
+          saveDishes();
+          renderAll();
+        });
+      });
+    }
+
+    document.getElementById("newDishButton").addEventListener("click", () => openDishForm());
+    document.getElementById("cancelDishForm").addEventListener("click", () => {
+      document.getElementById("dishFormPanel").classList.add("hidden");
+    });
+
+    document.getElementById("dishForm").addEventListener("submit", event => {
+      event.preventDefault();
+
+      const id = document.getElementById("dishId").value;
+      const dish = {
+        id: id || "dish_" + Date.now(),
+        name: document.getElementById("dishName").value.trim(),
+        category: document.getElementById("dishCategory").value,
+        price: Number(document.getElementById("dishPrice").value),
+        emoji: document.getElementById("dishEmoji").value.trim() || "🍽️",
+        description: document.getElementById("dishDescription").value.trim(),
+        available: document.getElementById("dishAvailable").checked
+      };
+
+      if (!dish.name || !dish.description || !Number.isFinite(dish.price) || dish.price <= 0) {
+        alert("Enter a dish name, description, and a valid price in rupees.");
+        return;
+      }
+
+      if (id) {
+        dishes = dishes.map(item => item.id === id ? dish : item);
+      } else {
+        dishes.push(dish);
+      }
+
+      saveDishes();
+      document.getElementById("dishFormPanel").classList.add("hidden");
+      renderAll();
+      alert("Menu saved successfully.");
+    });
+
+    const statuses = ["Pending", "Preparing", "Ready", "Served", "Cancelled"];
+
+    function renderStaff() {
+      const pending = orders.filter(order => order.status === "Pending").length;
+      const preparing = orders.filter(order => order.status === "Preparing").length;
+      const ready = orders.filter(order => order.status === "Ready").length;
+      const revenue = orders.filter(order => order.status !== "Cancelled")
+        .reduce((sum, order) => sum + order.total, 0);
+
+      document.getElementById("staffStats").innerHTML = `
+        <div class="stat"><span>Total orders</span><strong>${orders.length}</strong></div>
+        <div class="stat"><span>Pending</span><strong>${pending}</strong></div>
+        <div class="stat"><span>Preparing</span><strong>${preparing}</strong></div>
+        <div class="stat"><span>Ready</span><strong>${ready}</strong></div>
+        <div class="stat"><span>Order value*</span><strong style="font-size:21px">${money(revenue)}</strong></div>`;
+
+      const filters = ["All", ...statuses];
+      document.getElementById("orderFilters").innerHTML = filters.map(status =>
+        `<button class="filter ${activeOrderFilter === status ? "active" : ""}" data-order-filter="${status}">${status}</button>`
+      ).join("");
+
+      document.querySelectorAll("[data-order-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          activeOrderFilter = button.dataset.orderFilter;
+          renderStaff();
+        });
+      });
+
+      const filtered = orders.filter(order =>
+        activeOrderFilter === "All" || order.status === activeOrderFilter
+      );
+
+      document.getElementById("ordersList").innerHTML = filtered.length
+        ? filtered.map(order => `
+          <article class="order">
+            <div class="order-head">
+              <div><h3>Order ${escapeHTML(order.id)}</h3><div class="muted">${escapeHTML(order.customer)} · Table ${order.table} · ${new Date(order.createdAt).toLocaleString("en-IN")}</div></div>
+              <span class="status ${escapeHTML(order.status)}">${escapeHTML(order.status)}</span>
+            </div>
+            <div class="order-items">
+              ${order.items.map(item => `${item.quantity} × ${escapeHTML(item.name)} — ${money(item.lineTotal)}`).join("<br>")}
+              ${order.note ? `<br><strong>Note:</strong> ${escapeHTML(order.note)}` : ""}
+            </div>
+            <div class="order-bottom">
+              <strong>Total: ${money(order.total)}</strong>
+              <div class="row">
+                <label class="muted" for="status_${escapeHTML(order.id)}">Update status</label>
+                <select id="status_${escapeHTML(order.id)}" data-status-id="${escapeHTML(order.id)}" style="width:auto;min-width:140px">
+                  ${statuses.map(status => `<option ${order.status === status ? "selected" : ""}>${status}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+          </article>
+        `).join("")
+        : '<div class="panel empty">No orders found for this filter.</div>';
+
+      document.querySelectorAll("[data-status-id]").forEach(select => {
+        select.addEventListener("change", () => {
+          const order = orders.find(item => item.id === select.dataset.statusId);
+          if (!order) return;
+          order.status = select.value;
+          saveOrders();
+          renderStaff();
+        });
+      });
+    }
+
+    function exportCSV() {
+      if (!orders.length) {
+        alert("There are no orders to export yet.");
+        return;
+      }
+
+      const columns = ["Order ID", "Date", "Customer", "Table", "Items", "Total INR", "Status", "Note"];
+      const rows = orders.map(order => [
+        order.id,
+        new Date(order.createdAt).toLocaleString("en-IN"),
+        order.customer,
+        order.table,
+        order.items.map(item => `${item.quantity} x ${item.name}`).join("; "),
+        order.total,
+        order.status,
+        order.note || ""
+      ]);
+
+      const csvEscape = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+      const csv = [columns, ...rows].map(row => row.map(csvEscape).join(",")).join("\r\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "tambo-india-orders.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("exportOrders").addEventListener("click", exportCSV);
+    document.getElementById("placeOrder").addEventListener("click", placeOrder);
+    document.getElementById("searchMenu").addEventListener("input", renderMenu);
+
+    function renderTableLinks() {
+      const baseURL = location.href.split("?")[0].split("#")[0];
+      document.getElementById("tableLinks").innerHTML = Array.from({ length: 20 }, (_, index) => {
+        const table = index + 1;
+        const link = `${baseURL}?table=${table}`;
+        return `<article class="table-card">
+          <h3>Table ${table}</h3>
+          <p class="muted">Customers opening this link will have Table ${table} selected.</p>
+          <div class="link-box">${escapeHTML(link)}</div>
+          <div class="actions">
+            <button class="button small" data-copy-link="${table}">Copy Link</button>
+            <button class="button secondary small" data-open-link="${table}">Open Menu</button>
+          </div>
+        </article>`;
+      }).join("");
+
+      document.querySelectorAll("[data-copy-link]").forEach(button => {
+        button.addEventListener("click", async () => {
+          const table = button.dataset.copyLink;
+          const link = `${baseURL}?table=${table}`;
+          try {
+            await navigator.clipboard.writeText(link);
+            alert(`Copied the link for Table ${table}.`);
+          } catch {
+            prompt("Copy this table link:", link);
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-open-link]").forEach(button => {
+        button.addEventListener("click", () => {
+          const table = button.dataset.openLink;
+          window.open(`${baseURL}?table=${table}`, "_blank", "noopener");
+        });
+      });
+    }
+
+    function renderAll() {
+      renderCategories();
+      renderMenu();
+      renderCart();
+      renderManage();
+      renderStaff();
+      renderTableLinks();
+    }
+
+    initTables();
+    renderAll();
+  </script>
+</body>
+</html>
